@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2>Deadlock Detection</h2>
+<textarea id="graph" placeholder='{"P1":["P2"], "P2":["P1"]}'></textarea>
+<button id="detectBtn">Detect Deadlock</button>
+
+<h2>AI Prediction</h2>
+<input id="f1" placeholder="Processes (int)">
+<input id="f2" placeholder="Resources (int)">
+<input id="f3" placeholder="Hold Count (int)">
+<button id="predictBtn">Predict</button>
+
+<div id="output"></div>
+<script src="/static/js/app.js"></script>
+{% endblock %}
