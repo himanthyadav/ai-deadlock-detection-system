@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="About Project", page_icon="ℹ️", layout="wide")
 
-# 🎨 CUSTOM CSS
+
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
@@ -79,4 +79,5 @@ st.markdown("""
     <span class="tech-badge">🌊 Streamlit</span>
     <span class="tech-badge">🔢 NumPy</span>
     <span class="tech-badge">🤖 Scikit-Learn</span>
+
 """, unsafe_allow_html=True)
