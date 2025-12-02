@@ -3,9 +3,7 @@ import pandas as pd
 import numpy as np
 import time
 
-# ---------------------------------------------------------
-# 1. PAGE CONFIG
-# ---------------------------------------------------------
+
 st.set_page_config(
     page_title="Deadlock Simulation",
     page_icon="🛡️",
@@ -13,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 Some basic styling
+
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
@@ -55,27 +53,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# 2. HEADER
-# ---------------------------------------------------------
+
 st.title("🛡️ Deadlock Simulation")
 
-st.markdown("""
-This page simulates **Banker's Algorithm** for:
-- ✅ Single-instance resources  
-- ✅ Multiple-instance resources  
-
-You first specify **total capacity** of each resource, then how many
-resources are **allocated** to each process and what each process is
-currently **requesting (remaining need)**.
-The app automatically computes **Available** and checks for **deadlock**.
-""")
-
-st.markdown("---")
-
-# ---------------------------------------------------------
-# 3. CHOOSE RESOURCE TYPE
-# ---------------------------------------------------------
 with st.container(border=True):
     st.subheader("⚙️ System Configuration")
 
@@ -99,9 +79,7 @@ with st.container(border=True):
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# 4. TOTAL RESOURCE CAPACITY (MAX AVAILABLE IN SYSTEM)
-# ---------------------------------------------------------
+
 with st.container(border=True):
     st.subheader("1️⃣ Total Resource Capacity")
     st.caption("Maximum number of instances available for each resource type.")
@@ -124,14 +102,12 @@ total = np.array(total_resources, dtype=int)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# 5. ALLOCATION & REQUEST MATRICES
-# ---------------------------------------------------------
+
 st.subheader("2️⃣ Current System State")
 
 col_alloc, col_req = st.columns(2)
 
-# --- Allocation ---
+
 with col_alloc:
     st.info("🟦 Allocation Matrix (Resources currently held)")
     default_alloc = pd.DataFrame(
@@ -146,7 +122,7 @@ with col_alloc:
         key="alloc_editor"
     )
 
-# --- Request (Remaining Need) ---
+
 with col_req:
     st.warning("🟨 Request Matrix (Remaining resources needed to finish)")
     default_req = pd.DataFrame(
@@ -163,9 +139,6 @@ with col_req:
 
 st.markdown("---")
 
-# ---------------------------------------------------------
-# 6. AUTOMATIC AVAILABLE
-# ---------------------------------------------------------
 st.subheader("3️⃣ Automatically Computed Available Resources")
 
 alloc = alloc_df.to_numpy(dtype=int)
@@ -189,9 +162,7 @@ if np.any(available < 0):
 
 st.markdown("---")
 
-# ---------------------------------------------------------
-# 7. BANKER'S DEADLOCK DETECTION
-# ---------------------------------------------------------
+
 st.subheader("4️⃣ Simulation Analysis")
 
 c1, c2, c3 = st.columns([1, 2, 1])
@@ -210,7 +181,7 @@ def bankers_deadlock(total_vec, alloc_mat, req_mat):
     req_mat = np.array(req_mat, dtype=int)
 
     n, m = alloc_mat.shape
-    work = total_vec - alloc_mat.sum(axis=0)      # Available
+    work = total_vec - alloc_mat.sum(axis=0)      
     finish = np.array([False] * n)
     safe_seq = []
 
@@ -230,7 +201,7 @@ def bankers_deadlock(total_vec, alloc_mat, req_mat):
     return is_deadlock, safe_seq, deadlocked, work
 
 if run_btn:
-    # Save state for AI pages (they expect total, alloc, req)
+    
     st.session_state["last_state"] = {
         "total": total.tolist(),
         "alloc": alloc.tolist(),
@@ -244,7 +215,7 @@ if run_btn:
 
         status.update(label="Analysis Complete", state="complete", expanded=False)
 
-    # --------- OUTPUT UI ---------
+    
     if not is_dead:
         label_mode = "Single Instance" if mode == "Single Instance" else "Multiple Instance"
         st.markdown(f"""
@@ -267,3 +238,4 @@ if run_btn:
             <p>Blocked Processes: {", ".join(deadlocked)}</p>
         </div>
         """, unsafe_allow_html=True)
+
