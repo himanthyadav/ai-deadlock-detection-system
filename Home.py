@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="AI Deadlock Detection", page_icon="🤖", layout="wide")
 
-# 🎨 CUSTOM CSS
+
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
@@ -36,7 +36,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# HERO
+
 st.markdown('<h1 class="hero-title">AI-Powered Deadlock Detection</h1>', unsafe_allow_html=True)
 st.markdown('<div class="hero-subtitle">Operating Systems CA2 Project</div>', unsafe_allow_html=True)
 
@@ -44,7 +44,7 @@ st.markdown('<div class="hero-subtitle">Operating Systems CA2 Project</div>', un
 
 st.markdown("---")
 
-# FEATURES
+
 st.subheader("🚀 Features")
 c1, c2, c3, c4 = st.columns(4)
 
@@ -64,4 +64,5 @@ with c4: st.markdown(feature_card("📊", "Analysis", "Compare Accuracy"), unsaf
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("---")
+
 
