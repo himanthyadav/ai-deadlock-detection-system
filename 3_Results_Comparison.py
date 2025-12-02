@@ -4,7 +4,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Results Comparison", page_icon="📊", layout="wide")
 
-# 🎨 CUSTOM CSS
+
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
@@ -24,7 +24,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# -------- LOGIC --------
+
 def detect_deadlock(total_resources, allocation, request):
     total = np.array(total_resources, dtype=int)
     alloc = np.array(allocation, dtype=int)
@@ -42,7 +42,7 @@ def detect_deadlock(total_resources, allocation, request):
                 changed = True
     return bool((~finish).any())
 
-# -------- UI --------
+
 st.title("📊 Results Comparison")
 st.markdown("Compare the **Classical Algorithm** against the **AI Prediction Model**.")
 st.markdown("---")
@@ -57,7 +57,7 @@ alloc = np.array(last["alloc"])
 req = np.array(last["req"])
 n, m = alloc.shape
 
-# 1. Snapshot
+
 with st.container(border=True):
     st.subheader("1️⃣ System Snapshot")
     st.write("**Total Resources:**")
@@ -74,11 +74,11 @@ with st.container(border=True):
         st.caption("Request")
         st.dataframe(pd.DataFrame(req, columns=[f"R{j}" for j in range(m)]), use_container_width=True)
 
-# 2. Comparison
+
 st.markdown("---")
 st.subheader("2️⃣ Algorithm vs. AI")
 
-# Calc
+
 classical_deadlock = detect_deadlock(total, alloc, req)
 
 ai_result = None
@@ -127,4 +127,5 @@ with c_ai:
                 st.markdown('<div style="text-align:center"><span class="badge-safe">PREDICTED SAFE</span></div>', unsafe_allow_html=True)
             
             st.markdown(f"**Confidence:** `{ai_proba*100:.2f}%`")
+
             st.progress(ai_proba)
