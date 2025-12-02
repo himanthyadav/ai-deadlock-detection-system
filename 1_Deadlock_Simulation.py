@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time
-
+#main page
 
 st.set_page_config(
     page_title="Deadlock Simulation",
@@ -238,4 +238,5 @@ if run_btn:
             <p>Blocked Processes: {", ".join(deadlocked)}</p>
         </div>
         """, unsafe_allow_html=True)
+
 
