@@ -5,9 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix
 
-# -----------------------------------------------------------------------------
-# 1. PAGE CONFIG & THEME
-# -----------------------------------------------------------------------------
+
 st.set_page_config(
     page_title="AI Prediction",
     page_icon="🤖",
@@ -38,7 +36,7 @@ st.write("""
     lead to a deadlock or not.
 """)
 
-# -------- DEADLOCK LOGIC (Hidden) --------
+
 def detect_deadlock(total_resources, allocation, request):
     total = np.array(total_resources, dtype=int)
     alloc = np.array(allocation, dtype=int)
@@ -56,7 +54,7 @@ def detect_deadlock(total_resources, allocation, request):
                 changed = True
     return bool((~finish).any())
 
-# -------- RANDOM STATE GENERATION --------
+
 def generate_random_state(n_proc=3, n_res=3):
     total = np.random.randint(3, 10, size=n_res)
     alloc = np.zeros((n_proc, n_res), dtype=int)
@@ -88,9 +86,8 @@ def build_dataset(n_samples=200, n_proc=3, n_res=3):
         y.append(label)
     return np.array(X), np.array(y)
 
-# -------- UI SECTIONS --------
 
-# 1. Training Section
+
 with st.container(border=True):
     st.subheader("1️⃣ Generate Training Data")
     n_samples = st.slider("Number of training examples", 50, 1000, 300, 50)
@@ -120,7 +117,7 @@ with st.container(border=True):
 
 st.markdown("---")
 
-# 2. Prediction Section
+
 with st.container(border=True):
     st.subheader("2️⃣ Predict on Latest Simulation")
     
@@ -133,7 +130,7 @@ with st.container(border=True):
         feat_dim = st.session_state.get("feature_dim", None)
         last = st.session_state["last_state"]
         
-        # Prepare features
+
         total = np.array(last["total"])
         alloc = np.array(last["alloc"])
         req = np.array(last["req"])
@@ -148,4 +145,5 @@ with st.container(border=True):
             if pred == 1:
                 st.error(f"⚠️ AI Prediction: **DEADLOCK LIKELY** ({proba*100:.1f}%)")
             else:
+
                 st.success(f"✅ AI Prediction: **SAFE STATE** ({100-proba*100:.1f}%)")
