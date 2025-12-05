@@ -3,13 +3,13 @@ import pandas as pd
 import numpy as np
 import time
 
+
 st.set_page_config(
     page_title="Deadlock Simulation",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
 
 st.markdown("""
 <style>
@@ -52,8 +52,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 st.title("🛡️ Deadlock Simulation")
+
+# -------------------- 1. SYSTEM CONFIG --------------------
 
 with st.container(border=True):
     st.subheader("⚙️ System Configuration")
@@ -78,75 +79,123 @@ with st.container(border=True):
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+# -------------------- 2. TOTAL RESOURCE CAPACITY --------------------
 
-with st.container(border=True):
-    st.subheader("1️⃣ Total Resource Capacity")
-    st.caption("Maximum number of instances available for each resource type.")
+if mode == "Multiple Instance":
+    with st.container(border=True):
+        st.subheader("1️⃣ Total Resource Capacity")
+        st.caption("Maximum number of instances available for each resource type.")
 
-    total_resources = []
-    total_cols = st.columns(num_resources)
-    for j, col in enumerate(total_cols):
-        with col:
-            val = st.number_input(
-                f"R{j} (Total Capacity)",
-                min_value=1,
-                max_value=100,
-                value=7 if j == 0 else 5,   # some default
-                step=1,
-                key=f"total_r{j}"
-            )
-            total_resources.append(val)
+        total_resources = []
+        total_cols = st.columns(num_resources)
+        for j, col in enumerate(total_cols):
+            with col:
+                val = st.number_input(
+                    f"R{j} (Total Capacity)",
+                    min_value=1,
+                    max_value=100,
+                    value=7 if j == 0 else 5,
+                    step=1,
+                    key=f"total_r{j}"
+                )
+                total_resources.append(val)
 
-total = np.array(total_resources, dtype=int)
+    total = np.array(total_resources, dtype=int)
+
+else:
+    # SINGLE INSTANCE MODE → default capacity = 1, not editable
+    with st.container(border=True):
+        st.subheader("1️⃣ Total Resource Capacity")
+        st.caption("Single Instance Mode: Each resource has exactly 1 instance (fixed).")
+        cap_cols = st.columns(num_resources)
+        for j, col in enumerate(cap_cols):
+            with col:
+                col.metric(f"R{j}", 1)
+
+    total = np.ones(num_resources, dtype=int)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+# -------------------- 3. CURRENT SYSTEM STATE --------------------
 
 st.subheader("2️⃣ Current System State")
 
 col_alloc, col_req = st.columns(2)
 
+# Column names for all matrices
+resource_cols = [f"R{j}" for j in range(num_resources)]
+
+# Column configuration for data_editor
+if mode == "Single Instance":
+    # Binary only: 0 or 1
+    column_config = {
+        col_name: st.column_config.NumberColumn(
+            col_name,
+            min_value=0,
+            max_value=1,
+            step=1
+        )
+        for col_name in resource_cols
+    }
+else:
+    # Normal non-negative integers
+    column_config = {
+        col_name: st.column_config.NumberColumn(
+            col_name,
+            min_value=0,
+            step=1
+        )
+        for col_name in resource_cols
+    }
 
 with col_alloc:
     st.info("🟦 Allocation Matrix (Resources currently held)")
     default_alloc = pd.DataFrame(
         0,
         index=[f"P{i}" for i in range(num_processes)],
-        columns=[f"R{j}" for j in range(num_resources)]
+        columns=resource_cols
     )
     alloc_df = st.data_editor(
         default_alloc,
         num_rows="fixed",
         use_container_width=True,
-        key="alloc_editor"
+        key="alloc_editor",
+        column_config=column_config
     )
-
 
 with col_req:
     st.warning("🟨 Request Matrix (Remaining resources needed to finish)")
     default_req = pd.DataFrame(
         0,
         index=[f"P{i}" for i in range(num_processes)],
-        columns=[f"R{j}" for j in range(num_resources)]
+        columns=resource_cols
     )
     req_df = st.data_editor(
         default_req,
         num_rows="fixed",
         use_container_width=True,
-        key="req_editor"
+        key="req_editor",
+        column_config=column_config
     )
 
 st.markdown("---")
+
+# -------------------- 4. AVAILABLE RESOURCES --------------------
 
 st.subheader("3️⃣ Automatically Computed Available Resources")
 
 alloc = alloc_df.to_numpy(dtype=int)
 req = req_df.to_numpy(dtype=int)
 
+# Extra safety: ensure binary in Single Instance mode
+if mode == "Single Instance":
+    if not (np.isin(alloc, [0, 1]).all() and np.isin(req, [0, 1]).all()):
+        st.error("In Single Instance mode, Allocation and Request matrices must contain only 0 or 1.")
+        st.stop()
+
 allocated_sum = alloc.sum(axis=0)
 available = total - allocated_sum
 
-# Display metrics
 avail_cols = st.columns(num_resources)
 for j, col in enumerate(avail_cols):
     with col:
@@ -161,6 +210,7 @@ if np.any(available < 0):
 
 st.markdown("---")
 
+# -------------------- 5. SIMULATION ANALYSIS --------------------
 
 st.subheader("4️⃣ Simulation Analysis")
 
@@ -180,7 +230,7 @@ def bankers_deadlock(total_vec, alloc_mat, req_mat):
     req_mat = np.array(req_mat, dtype=int)
 
     n, m = alloc_mat.shape
-    work = total_vec - alloc_mat.sum(axis=0)      
+    work = total_vec - alloc_mat.sum(axis=0)
     finish = np.array([False] * n)
     safe_seq = []
 
@@ -189,7 +239,6 @@ def bankers_deadlock(total_vec, alloc_mat, req_mat):
         changed = False
         for i in range(n):
             if not finish[i] and np.all(req_mat[i] <= work):
-                # this process can finish
                 work = work + alloc_mat[i]
                 finish[i] = True
                 safe_seq.append(f"P{i}")
@@ -200,13 +249,11 @@ def bankers_deadlock(total_vec, alloc_mat, req_mat):
     return is_deadlock, safe_seq, deadlocked, work
 
 if run_btn:
-    
     st.session_state["last_state"] = {
         "total": total.tolist(),
         "alloc": alloc.tolist(),
         "req": req.tolist(),
     }
-
     with st.status("Running Banker's Algorithm...", expanded=True) as status:
         time.sleep(0.4)
 
@@ -214,7 +261,6 @@ if run_btn:
 
         status.update(label="Analysis Complete", state="complete", expanded=False)
 
-    
     if not is_dead:
         label_mode = "Single Instance" if mode == "Single Instance" else "Multiple Instance"
         st.markdown(f"""
@@ -237,6 +283,3 @@ if run_btn:
             <p>Blocked Processes: {", ".join(deadlocked)}</p>
         </div>
         """, unsafe_allow_html=True)
-
-
-
